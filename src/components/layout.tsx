@@ -9,7 +9,7 @@ const Wrapper = styled.div`
   height: 100%;
   padding: 50px 0px;
   width: 100%;
-  max-width: 860px;
+  max-width: 1080px;
 `;
 
 const Menu = styled.div`
@@ -43,7 +43,7 @@ const MenuItem = styled.div`
 export default function Layout() {
   const navigate = useNavigate();
   const onLogOut = async () => {
-    const ok = confirm("Are you sure want to log oyt?");
+    const ok = confirm("Are you sure want to log out?");
     if (ok) {
       await auth.signOut();
       navigate("/login");
