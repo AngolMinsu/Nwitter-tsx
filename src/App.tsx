@@ -10,6 +10,7 @@ import { useEffect, useState } from "react";
 import LoadingScreen from "./components/loading-screen";
 import { auth } from "./firebase";
 import { styled } from "styled-components";
+import ProtectedRoute from "./components/protected-route";
 
 const Wrapper = styled.div`
   height: 100vh;
@@ -20,11 +21,30 @@ const Wrapper = styled.div`
 const router = createBrowserRouter([
   {
     path: "/",
-    element: <Layout />,
+    element: (
+      /*
+      ProtectedRoute 파일에서도 언급했던것 처럼
+      로그인 되어있으면 Children을 반환
+      반환된 Protected-Children은 Layout을 감쌈
+      Layout은 Home 또는 Profile의 Children을 가지고 있음
+      결론적으로 Protecetd-children(Layout-children)의 형태가 되는 것
+      */
+      <ProtectedRoute>
+        <Layout />
+      </ProtectedRoute>
+    ),
     children: [
       {
         path: "",
-        element: <Home />,
+        element: (
+          /* 이렇게 설정해 두면 ProtectedRoute의 children으로 보내 질 것
+          <ProtectedRoute>
+            <Home />
+          </ProtectedRoute>
+          */
+          <Home />
+          // 우린 가능한 많은 영역에 이를 활용하려고 layout에 씌울거임
+        ),
       },
       {
         path: "profile",

@@ -1,49 +1,23 @@
+import { createUserWithEmailAndPassword } from "firebase/auth/cordova";
 import React, { useState } from "react";
-import { styled } from "styled-components";
-
-const Wrapper = styled.div`
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  width: 420px;
-  padding: 50px 0px;
-`;
-
-const Form = styled.form`
-  margin-top: 50px;
-  display: flex;
-  flex-direction: column;
-  gap: 10px;
-  width: 100%;
-`;
-
-const Input = styled.input`
-  padding: 10px 20px;
-  border-radius: 50px;
-  border: none;
-  width: 100%;
-  font-size: 16px;
-  &[type="submit"] {
-    cursor: pointer;
-    &:hover {
-      opacity: 0.8;
-    }
-  }
-`;
-
-const Title = styled.h1`
-  font-size: 42px;
-`;
-
-const Error = styled.span`
-  font-weight: 600;
-  color: tomato;
-`;
+import { auth } from "../firebase";
+import { updateProfile } from "firebase/auth";
+import { useNavigate, Link } from "react-router-dom";
+import { FirebaseError } from "firebase/app";
+import {
+  Error,
+  Input,
+  Wrapper,
+  Title,
+  Form,
+  Switcher,
+} from "../components/auth-components";
+import GitHubButton from "../components/github-btn";
 
 export default function CreateAccount() {
+  const navigate = useNavigate();
   // 로딩 상태를 나타내는 코드
-  const [isLoading, settLoading] = useState(false);
+  const [isLoading, setLoading] = useState(false);
   // useState를 사용한 게정 생성에 필요한 값을 받는 곳
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -65,18 +39,39 @@ export default function CreateAccount() {
       setPassword(value);
     }
   };
-  const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const onSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setError("");
     // 여기에 계정 생성이랑 등... 만들것
+    // 로딩중 이거나 이름, 이메일, 비밀번호가 비었는지 확인하는 코드
+    if (isLoading || name === "" || email === "" || password === "") return;
     try {
+      setLoading(true);
+      const credentials = await createUserWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      console.log(credentials.user);
+      // 유저 프로필 생성 및 업데이트
+      await updateProfile(credentials.user, {
+        displayName: name,
+      });
+      // 계정 생성 후 홈('/')라우트로 보내기
+      navigate("/");
+      // 인증받지 못하면 여기 catch로 이동함
     } catch (e) {
+      // 에러 코드
+      if (e instanceof FirebaseError) {
+        setError(e.message);
+      }
     } finally {
-      settLoading(false);
+      setLoading(false);
     }
   };
   return (
     <Wrapper>
-      <Title>Log into 'set something here!'</Title>
+      <Title>Join to my web page</Title>
       <Form onSubmit={onSubmit}>
         <Input
           onChange={onChange}
@@ -108,6 +103,10 @@ export default function CreateAccount() {
         />
       </Form>
       {error !== "" ? <Error>{error}</Error> : null}
+      <Switcher>
+        Already have an account? <Link to="/login">Log in &rarr;</Link>
+      </Switcher>
+      <GitHubButton />
     </Wrapper>
   );
 }

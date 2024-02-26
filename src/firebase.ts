@@ -6,14 +6,13 @@ import { getAuth } from "firebase/auth";
 
 // Your web app's Firebase configuration
 const firebaseConfig = {
-  apiKey: "AIzaSyBcYRolWnf6MBxirb7M3ZoKCymNK0GG4fA",
-  authDomain: "nwitter-re-43cce.firebaseapp.com",
-  projectId: "nwitter-re-43cce",
-  storageBucket: "nwitter-re-43cce.appspot.com",
-  messagingSenderId: "157922025202",
-  appId: "1:157922025202:web:81ef28a62173879678ba6b",
+  apiKey: "AIzaSyCaaB_2CxSIvLnYh3se_cnIeWlewOC7Epg",
+  authDomain: "nwitter-4490a.firebaseapp.com",
+  projectId: "nwitter-4490a",
+  storageBucket: "nwitter-4490a.appspot.com",
+  messagingSenderId: "778432445001",
+  appId: "1:778432445001:web:54096ef36e4bd1efc1dd98",
 };
-
 // Initialize Firebase
 const app = initializeApp(firebaseConfig);
 // 우리의 앱에 대해서 인증을 사용하고 싶음
