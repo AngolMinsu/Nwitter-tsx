@@ -24,23 +24,27 @@ export default function Timeline() {
   const [tweets, setTweets] = useState<ITweet[]>([]);
   // 비동기 함수
   const fetchTweets = async () => {
-    // query는 firebase에서 데이터를 불러오는 것
-    const tweetsQuery = query(
-      // collection 함수는 firestore와 db의 컬렉션이름을 요구함
-      collection(db, "tweets"),
-      // 가장 최신순으로 정렬하는 함수
-      // 기준은 createdAt이고 내림차순으로 정렬
-      orderBy("createdAt", "desc")
-    );
-    // query를 주면 snapquery를 반환함
-    const snapshot = await getDocs(tweetsQuery);
-    // 우리가 map으로 받은 모든 문서마다 리턴 이하와 같은 객체를 생성
-    const fetchedTweets = snapshot.docs.map((doc) => {
-      const { tweet, createdAt, userId, username, photo } = doc.data();
-      return { tweet, createdAt, userId, username, photo, id: doc.id };
-    });
-    // 이렇게 생성된 tweets 객체를 setTweet에 사용
-    setTweets(fetchedTweets);
+    try {
+      // query는 firebase에서 데이터를 불러오는 것
+      const tweetsQuery = query(
+        // collection 함수는 firestore와 db의 컬렉션이름을 요구함
+        collection(db, "tweets"),
+        // 가장 최신순으로 정렬하는 함수
+        // 기준은 createdAt이고 내림차순으로 정렬
+        orderBy("createdAt", "desc")
+      );
+      // query를 주면 snapquery를 반환함
+      const snapshot = await getDocs(tweetsQuery);
+      // 우리가 map으로 받은 모든 문서마다 리턴 이하와 같은 객체를 생성
+      const fetchedTweets = snapshot.docs.map((doc) => {
+        const { tweet, createdAt, userId, username, photo } = doc.data();
+        return { tweet, createdAt, userId, username, photo, id: doc.id };
+      });
+      // 이렇게 생성된 tweets 객체를 setTweet에 사용
+      setTweets(fetchedTweets);
+    } catch (error) {
+      console.log(error);
+    }
   };
   // useEffect를 활용해 fetchTweets를 호출할 것
   useEffect(() => {
