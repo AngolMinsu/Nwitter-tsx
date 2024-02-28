@@ -72,15 +72,15 @@ const GlobalStyles = createGlobalStyle`
     color:white;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
   }
+  ::-webkit-scrollbar {
+    display:none;
+    }
 `;
 
 function App() {
   const [isLoading, settLoading] = useState(true);
   // firebase가 준비될 때 까지 대기하는 함수
   const init = async () => {
-    /* 테스트용
-    setTimeout(() => settLoading(false), 2000);
-    */
     // firebase가 쿠키와 토큰을 읽고 로그인 여부를 확인하는동안 기다리겠다.
     await auth.authStateReady();
     settLoading(false);
