@@ -1,6 +1,5 @@
 import {
   collection,
-  getDocs,
   limit,
   onSnapshot,
   orderBy,
@@ -40,19 +39,6 @@ export default function Timeline() {
         orderBy("createAt", "desc"),
         limit(25) // pagenation
       );
-      // 우리가 받은 모든 문서마다 이와 같은 객체를 만듬
-      //const spanshot = await getDocs(tweetsQuery);
-      // const tweets = spanshot.docs.map((doc) => {
-      //   const { tweet, createdAt, userId, username, photo } = doc.data();
-      //   return {
-      //     tweet,
-      //     createdAt,
-      //     userId,
-      //     username,
-      //     photo,
-      //     id: doc.id,
-      //   };
-      // });
       // onSnapshot는 실시간으로 쿼리의 변경사항을 확인할 수 있음
       // 또한 유저가 타임라인을 보고있을 때엔 비용을 지불하지 않도록 변수로 만듬
       unsubscribe = await onSnapshot(tweetsQuery, (snapshot) => {

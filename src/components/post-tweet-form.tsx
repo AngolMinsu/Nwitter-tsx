@@ -101,10 +101,9 @@ export default function PostTweetForm() {
         userId: user.uid,
       });
       if (file) {
-        const locationRef = ref(
-          storage,
-          `tweets/${user.uid}-${user.displayName}/${doc.id}`
-        );
+        // 트윗 사진이 저장된 위치
+        // firebase/storage 함수 중 ref는 스토리지와 스토리지 위치 두 개의 인자를 받는다
+        const locationRef = ref(storage, `tweets/${user.uid}/${doc.id}`);
         const result = await uploadBytes(locationRef, file);
         const url = await getDownloadURL(result.ref);
         await updateDoc(doc, { photo: url });
