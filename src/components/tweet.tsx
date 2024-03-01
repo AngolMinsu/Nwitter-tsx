@@ -3,7 +3,6 @@ import { ITweet } from "./timeline";
 import { auth, db, storage } from "../firebase";
 import { deleteDoc, doc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
-
 const Wrapper = styled.div`
   display: grid;
   grid-template-columns: 3fr 1fr;
@@ -39,7 +38,8 @@ const DeleteButton = styled.button`
   font-size: 12px;
   padding: 5px 10px;
   text-transform: uppercase;
-  border-raius: 5px;
+  border-radius: 5px;
+  margin-right: 5px;
 `;
 
 // tweet.tsx는 timeline에서 ITweet 인터페이스를 불러와 인자로 받는다
@@ -64,13 +64,16 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
       console.log(e);
     }
   };
+
   return (
     <Wrapper>
       <Column>
         <Username>{username}</Username>
         <Payload>{tweet}</Payload>
         {user?.uid === userId ? (
-          <DeleteButton onClick={onDelete}>Delete</DeleteButton>
+          <>
+            <DeleteButton onClick={onDelete}>Delete</DeleteButton>
+          </>
         ) : null}
       </Column>
       {photo ? (
