@@ -24,6 +24,7 @@ const Wrapper = styled.div`
   display: flext;
   gap: 10px;
   flect-direction: column;
+  overflow-y: scroll;
 `;
 
 // firebase db를 쿼리함
