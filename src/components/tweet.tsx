@@ -149,7 +149,7 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
   const user = auth.currentUser;
   const photoRef = ref(storage, `tweets/${user?.uid}/${id}`);
 
-  const maxFileSizeInMB = 1;
+  const maxFileSizeInMB = 10;
   const maxFileSizeInKB = 1024 * 1024 * maxFileSizeInMB;
 
   const onDelete = async () => {
@@ -242,20 +242,22 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
       {photo ? (
         <ColumnFile>
           <Photo src={photo} />
-          <EditFileArea>
-            <EditFile>
-              <label htmlFor="tweetFile">edit</label>
-              <input
-                type="file"
-                id="tweetFile"
-                accept="image/*"
-                onChange={onEditFile}
-              />
-            </EditFile>
-            <DeleteFile onClick={onDeleteFile}>
-              <span>delete</span>
-            </DeleteFile>
-          </EditFileArea>
+          {edit !== false ? (
+            <EditFileArea>
+              <EditFile>
+                <label htmlFor="tweetFile">edit</label>
+                <input
+                  type="file"
+                  id="tweetFile"
+                  accept="image/*"
+                  onChange={onEditFile}
+                />
+              </EditFile>
+              <DeleteFile onClick={onDeleteFile}>
+                <span>delete</span>
+              </DeleteFile>
+            </EditFileArea>
+          ) : null}
         </ColumnFile>
       ) : null}
     </Wrapper>
