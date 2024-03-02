@@ -3,6 +3,8 @@ import { ITweet } from "./timeline";
 import { auth, db, storage } from "../firebase";
 import { deleteDoc, doc } from "firebase/firestore";
 import { deleteObject, ref } from "firebase/storage";
+import EditTweetForm from "./edit-tweet-form";
+import { useState } from "react";
 const Wrapper = styled.div`
   display: grid;
   grid-template-columns: 3fr 1fr;
@@ -42,9 +44,22 @@ const DeleteButton = styled.button`
   margin-right: 5px;
 `;
 
+const EditButton = styled.button`
+  background-color: #1d9bf0;
+  color: white;
+  font-weight: 600;
+  border: 0;
+  font-size: 12px;
+  padding: 5px 10px;
+  text-transform: uppercase;
+  border-radius: 5px;
+  margin-right: 5px;
+`;
+
 // tweet.tsx는 timeline에서 ITweet 인터페이스를 불러와 인자로 받는다
 export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
   const user = auth.currentUser;
+  const [isEditing, setIsEditting] = useState(false);
   const onDelete = async () => {
     const ok = confirm("Are you sure you want to delete this tweet?");
     if (!ok || user?.uid !== userId) return;
@@ -65,14 +80,31 @@ export default function Tweet({ username, photo, tweet, userId, id }: ITweet) {
     }
   };
 
+  const onEdit = async () => {
+    setIsEditting((prev) => !prev);
+  };
+
   return (
     <Wrapper>
       <Column>
         <Username>{username}</Username>
-        <Payload>{tweet}</Payload>
+        {isEditing ? (
+          <EditTweetForm
+            tweet={tweet}
+            id={id}
+            userId={userId}
+            username={username}
+            createdAt={0}
+          ></EditTweetForm>
+        ) : (
+          <Payload>{tweet}</Payload>
+        )}
         {user?.uid === userId ? (
           <>
             <DeleteButton onClick={onDelete}>Delete</DeleteButton>
+            <EditButton onClick={onEdit}>
+              {isEditing === true ? "Cancel" : "Edit"}
+            </EditButton>
           </>
         ) : null}
       </Column>
