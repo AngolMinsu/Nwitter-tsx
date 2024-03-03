@@ -23,7 +23,7 @@ export interface ITweet {
 const Wrapper = styled.div`
   display: flext;
   gap: 10px;
-  flect-direction: column;
+  flex-direction: column;
 `;
 
 // firebase db를 쿼리함

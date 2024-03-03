@@ -1,8 +1,18 @@
-import styled from "styled-components";
-import { auth, storage } from "../firebase";
-import React, { useState } from "react";
+import { styled } from "styled-components";
+import { auth, db, storage } from "../firebase";
+import { useEffect, useState } from "react";
 import { getDownloadURL, ref, uploadBytes } from "firebase/storage";
 import { updateProfile } from "firebase/auth";
+import {
+  collection,
+  getDocs,
+  limit,
+  orderBy,
+  query,
+  where,
+} from "firebase/firestore";
+import { ITweet } from "../components/timeline";
+import Tweet from "../components/tweet";
 
 const Wrapper = styled.div`
   display: flex;
@@ -10,7 +20,6 @@ const Wrapper = styled.div`
   flex-direction: column;
   gap: 20px;
 `;
-
 const AvatarUpload = styled.label`
   width: 80px;
   overflow: hidden;
@@ -29,39 +38,72 @@ const AvatarUpload = styled.label`
 const AvatarImg = styled.img`
   width: 100%;
 `;
-
 const AvatarInput = styled.input`
   display: none;
 `;
-
 const Name = styled.span`
   font-size: 22px;
 `;
 
+const Tweets = styled.div`
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  gap: 10px;
+`;
+
 export default function Profile() {
   const user = auth.currentUser;
-  // 아바타 속성을 photoURL을 이용해 얻어온다
   const [avatar, setAvatar] = useState(user?.photoURL);
+  const [tweets, setTweets] = useState<ITweet[]>([]);
   const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (!user) return;
     if (files && files.length === 1) {
       const file = files[0];
-      // 이렇게 로케이션을 지정해두면 사진을 변경할 때 마다 덮어쓰기가 됨
       const locationRef = ref(storage, `avatars/${user?.uid}`);
-      // uploadBytes는 firebase의 지정된 storage위치에 업로드 하는 역할
       const result = await uploadBytes(locationRef, file);
-      // 다운로드 URL을 얻어오는 역할
       const avatarUrl = await getDownloadURL(result.ref);
-      // state update
       setAvatar(avatarUrl);
-      // 사용자의 프로필을 업데이트
-      // 인자를 두 개 받는데 1.어느 유저인가(auth.currentuser)
-      // 2.어떤 속성을 변경할 것 인가
-      await updateProfile(user, { photoURL: avatarUrl });
+      await updateProfile(user, {
+        photoURL: avatarUrl,
+      });
     }
   };
-  // htmlFor에 Input의 id를 넣어두면 연동된다
+  // tweets들의 timeline을 가져올 때 쓰는 것과 유사
+  const fetchTweets = async () => {
+    // 먼저 쿼리 생성
+    const tweetQuery = query(
+      // 컬렉션을 불러온다
+      collection(db, "tweets"),
+      // where함수는 필터링 기능. 조건에 맞는 트윗만 가져올 것
+      // 문서의 필드, 연산자, 조건
+      where("userId", "==", user?.uid),
+      // 정렬
+      orderBy("createdAt", "desc"),
+      // 이렇게 데이터를 필터링 하고싶다면 firestore에게 미리 해당 정보를 주어야함
+      // 먼저 쿼리를 날린 후 콘솔에서 설정창 링크를 확인할 수 있음
+      limit(25)
+    );
+    // 생성한 쿼리를 기반으로 문서를 가져옴
+    const snapshot = await getDocs(tweetQuery);
+    const tweets = snapshot.docs.map((doc) => {
+      const { tweet, createdAt, userId, username, photo } = doc.data();
+      return {
+        tweet,
+        createdAt,
+        userId,
+        username,
+        photo,
+        id: doc.id,
+      };
+    });
+    setTweets(tweets);
+  };
+  // 리얼타임이 아니므로 바로 함수를 실행시켜 줄 것
+  useEffect(() => {
+    fetchTweets();
+  }, []);
   return (
     <Wrapper>
       <AvatarUpload htmlFor="avatar">
@@ -69,19 +111,12 @@ export default function Profile() {
           <AvatarImg src={avatar} />
         ) : (
           <svg
-            data-slot="icon"
-            fill="none"
-            strokeWidth={1.5}
-            stroke="currentColor"
-            viewBox="0 0 24 24"
+            fill="currentColor"
+            viewBox="0 0 20 20"
             xmlns="http://www.w3.org/2000/svg"
             aria-hidden="true"
           >
-            <path
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              d="M15.75 6a3.75 3.75 0 1 1-7.5 0 3.75 3.75 0 0 1 7.5 0ZM4.501 20.118a7.5 7.5 0 0 1 14.998 0A17.933 17.933 0 0 1 12 21.75c-2.676 0-5.216-.584-7.499-1.632Z"
-            />
+            <path d="M10 8a3 3 0 100-6 3 3 0 000 6zM3.465 14.493a1.23 1.23 0 00.41 1.412A9.957 9.957 0 0010 18c2.31 0 4.438-.784 6.131-2.1.43-.333.604-.903.408-1.41a7.002 7.002 0 00-13.074.003z" />
           </svg>
         )}
       </AvatarUpload>
@@ -92,6 +127,11 @@ export default function Profile() {
         accept="image/*"
       />
       <Name>{user?.displayName ?? "Anonymous"}</Name>
+      <Tweets>
+        {tweets.map((tweet) => (
+          <Tweet key={tweet.id} {...tweet} />
+        ))}
+      </Tweets>
     </Wrapper>
   );
 }
