@@ -119,10 +119,10 @@ export default function Profile() {
     // 생성한 쿼리를 기반으로 문서를 가져옴
     const snapshot = await getDocs(tweetQuery);
     const tweets = snapshot.docs.map((doc) => {
-      const { tweet, createdAt, userId, username, photo } = doc.data();
+      const { tweet, createAt, userId, username, photo } = doc.data();
       return {
         tweet,
-        createdAt,
+        createAt,
         userId,
         username,
         photo,

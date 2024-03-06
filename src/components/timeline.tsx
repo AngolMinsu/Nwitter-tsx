@@ -17,7 +17,7 @@ export interface ITweet {
   tweet: string;
   userId: string;
   username: string;
-  createdAt: number;
+  createAt: number;
 }
 
 const Wrapper = styled.div`
@@ -43,10 +43,10 @@ export default function Timeline() {
       // 또한 유저가 타임라인을 보고있을 때엔 비용을 지불하지 않도록 변수로 만듬
       unsubscribe = await onSnapshot(tweetsQuery, (snapshot) => {
         const tweets = snapshot.docs.map((doc) => {
-          const { tweet, createdAt, userId, username, photo } = doc.data();
+          const { tweet, createAt, userId, username, photo } = doc.data();
           return {
             tweet,
-            createdAt,
+            createAt,
             userId,
             username,
             photo,
