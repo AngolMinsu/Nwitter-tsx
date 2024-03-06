@@ -42,6 +42,7 @@ const AvatarInput = styled.input`
   display: none;
 `;
 const Name = styled.span`
+  display: grid;
   font-size: 22px;
 `;
 
@@ -52,10 +53,39 @@ const Tweets = styled.div`
   gap: 10px;
 `;
 
+const EditButton = styled.button`
+  padding: 5px 10px;
+  background-color: #1d9bf0;
+  border-radius: 5px;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  transition: background-color 0.3s;
+  &:hover {
+    background-color: #2980b9;
+    color: #ffffff;
+  }
+`;
+
+const NamingBlank = styled.input`
+  background-color: #202020;
+  font-size: 22px;
+  text-align: center;
+  color: white;
+  border: 1px none;
+  outline: none;
+  border-radius: 5px;
+  &:focus {
+    background-color: #404040;
+  }
+`;
+
 export default function Profile() {
   const user = auth.currentUser;
   const [avatar, setAvatar] = useState(user?.photoURL);
   const [tweets, setTweets] = useState<ITweet[]>([]);
+  const [name, setName] = useState(user?.displayName ?? "Anonymous");
+  const [editMode, setEditMode] = useState(false);
   const onAvatarChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const { files } = e.target;
     if (!user) return;
@@ -70,6 +100,7 @@ export default function Profile() {
       });
     }
   };
+
   // tweets들의 timeline을 가져올 때 쓰는 것과 유사
   const fetchTweets = async () => {
     // 먼저 쿼리 생성
@@ -80,7 +111,7 @@ export default function Profile() {
       // 문서의 필드, 연산자, 조건
       where("userId", "==", user?.uid),
       // 정렬
-      orderBy("createdAt", "desc"),
+      orderBy("createAt", "desc"),
       // 이렇게 데이터를 필터링 하고싶다면 firestore에게 미리 해당 정보를 주어야함
       // 먼저 쿼리를 날린 후 콘솔에서 설정창 링크를 확인할 수 있음
       limit(25)
@@ -104,6 +135,25 @@ export default function Profile() {
   useEffect(() => {
     fetchTweets();
   }, []);
+
+  const onChangeNameClick = async () => {
+    if (!user) return;
+    setEditMode((prev) => !prev);
+    if (!editMode) return;
+    try {
+      await updateProfile(user, {
+        displayName: name,
+      });
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setEditMode(false);
+    }
+  };
+
+  const onNameChange = (event: React.ChangeEvent<HTMLInputElement>) =>
+    setName(event.target.value);
+
   return (
     <Wrapper>
       <AvatarUpload htmlFor="avatar">
@@ -126,7 +176,14 @@ export default function Profile() {
         type="file"
         accept="image/*"
       />
-      <Name>{user?.displayName ?? "Anonymous"}</Name>
+      {editMode ? (
+        <NamingBlank onChange={onNameChange} type="text" value={name} />
+      ) : (
+        <Name>{user?.displayName ?? "Anonymous"}</Name>
+      )}
+      <EditButton onClick={onChangeNameClick}>
+        {editMode ? "Save" : "Edit Name"}
+      </EditButton>
       <Tweets>
         {tweets.map((tweet) => (
           <Tweet key={tweet.id} {...tweet} />
